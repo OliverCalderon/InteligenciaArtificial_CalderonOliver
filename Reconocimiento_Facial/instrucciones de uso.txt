@@ -1,0 +1,84 @@
+1. Instalar Python 3.13
+TensorFlow no funciona bien con Python 3.14 en este proyecto.
+
+2. Verificar que Python 3.13 este disponible
+Ejecutar este comando:
+py -0p
+
+3. Instalar las dependencias
+Ejecutar este comando en la carpeta del proyecto:
+py -3.13 -m pip install mtcnn opencv-python tensorflow scikit-learn numpy pillow ddgs
+
+4. Estructura del proyecto
+python\rostro.py = captura rostros propios con webcam
+python\famosos.py = descarga rostros de famosos desde LFW
+python\internet.py = busca imagenes en internet y guarda el rostro principal
+python\aumentar.py = genera aumento de datos
+python\renumerar.py = renumera archivos rostro_N.jpg para quitar huecos
+
+5. Ejecutar la captura de rostros propios
+py -3.13 python\rostro.py
+
+Este script:
+- pide el nombre de la persona
+- abre la camara
+- detecta el rostro con MTCNN
+- guarda imagenes en Dataset\<nombre_persona>
+
+6. Ejecutar la descarga de rostros de famosos desde LFW
+py -3.13 python\famosos.py
+
+Este script:
+- descarga imagenes del dataset LFW
+- crea carpetas por persona en Dataset
+- guarda hasta 200 imagenes por persona
+
+7. Ejecutar la busqueda de imagenes en internet
+py -3.13 python\internet.py
+
+Este script:
+- pide el nombre de una persona o personaje
+- busca imagenes en internet
+- intenta detectar el rostro principal
+- guarda imagenes en Dataset\<nombre_persona>
+
+Ejemplo simple:
+py -3.13 python\internet.py --persona "Keanu Reeves" --cantidad 50
+
+Ejemplo con alias:
+py -3.13 python\internet.py --persona "P Diddy" --alias "Sean Combs" --cantidad 80
+
+Ejemplo con consulta manual:
+py -3.13 python\internet.py --persona "Jeffrey Epstein" --consulta "Jeffrey Epstein photo" --cantidad 60
+
+8. Ejecutar la aumentacion de datos
+py -3.13 python\aumentar.py
+
+Este script:
+- toma las imagenes de Dataset
+- genera versiones espejo, rotadas y con brillo distinto
+- guarda el resultado en Dataset_aumentado
+
+9. Renumerar una carpeta si eliminaste imagenes manualmente
+Ejemplo:
+py -3.13 python\renumerar.py --persona "P Diddy"
+
+Vista previa sin cambiar nada:
+py -3.13 python\renumerar.py --persona "P Diddy" --dry-run
+
+Para renumerar desde 0:
+py -3.13 python\renumerar.py --persona "P Diddy" --inicio 0
+
+Este script:
+- detecta archivos con el patron rostro_<numero>.jpg
+- elimina huecos de numeracion
+- renombra los archivos en orden
+
+10. Carpetas generadas
+Dataset = imagenes originales y procesadas
+Dataset_aumentado = imagenes finales con aumentacion
+
+11. Recomendaciones
+- usa siempre py -3.13 para ejecutar los scripts
+- si interrumpes internet.py con Ctrl+C, las imagenes ya guardadas no se pierden
+- si una carpeta tiene huecos en los nombres, usa renumerar.py antes de seguir trabajando
