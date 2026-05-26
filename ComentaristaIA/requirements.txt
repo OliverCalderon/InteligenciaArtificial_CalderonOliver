@@ -1,0 +1,14 @@
+--extra-index-url https://download.pytorch.org/whl/cu124
+streamlit
+opencv-python
+transformers<=4.46.3
+scipy
+pillow
+numpy
+moviepy
+torch
+torchaudio
+timm
+einops
+accelerate
+sentencepiece
