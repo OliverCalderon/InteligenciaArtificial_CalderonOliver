@@ -1,0 +1,128 @@
+1. Instalar Python 3.13
+TensorFlow no funciona bien con Python 3.14 en este proyecto.
+
+2. Verificar que Python 3.13 este disponible
+Ejecutar este comando:
+py -0p
+
+3. Instalar las dependencias
+Ejecutar este comando en la carpeta del proyecto:
+py -3.13 -m pip install mtcnn opencv-python tensorflow scikit-learn numpy pillow ddgs
+
+4. Estructura del proyecto
+python\rostro.py = captura rostros propios con webcam
+python\famosos.py = descarga rostros de famosos desde LFW
+python\internet.py = busca imagenes en internet y guarda el rostro principal
+python\aumentar.py = genera aumento de datos
+python\renumerar.py = renumera archivos rostro_N.jpg para quitar huecos
+
+5. Ejecutar la captura de rostros propios
+py -3.13 python\rostro.py
+
+Este script:
+- pide el nombre de la persona
+- abre la camara
+- detecta el rostro con MTCNN
+- guarda imagenes en Dataset\<nombre_persona>
+
+6. Ejecutar la descarga de rostros de famosos desde LFW
+py -3.13 python\famosos.py
+
+Este script:
+- descarga imagenes del dataset LFW
+- crea carpetas por persona en Dataset
+- guarda hasta 200 imagenes por persona
+
+7. Ejecutar la busqueda de imagenes en internet
+py -3.13 python\internet.py
+
+Este script:
+- pide el nombre de una persona o personaje
+- busca imagenes en internet
+- intenta detectar el rostro principal
+- guarda imagenes en Dataset\<nombre_persona>
+
+Ejemplo simple:
+py -3.13 python\internet.py --persona "Keanu Reeves" --cantidad 50
+
+Ejemplo con alias:
+py -3.13 python\internet.py --persona "P Diddy" --alias "Sean Combs" --cantidad 80
+
+Ejemplo con consulta manual:
+py -3.13 python\internet.py --persona "Jeffrey Epstein" --consulta "Jeffrey Epstein photo" --cantidad 60
+
+8. Ejecutar la aumentacion de datos
+py -3.13 python\aumentar.py
+
+Este script:
+- toma las imagenes de Dataset
+- genera versiones espejo, rotadas y con brillo distinto
+- guarda el resultado en Dataset_aumentado
+
+9. Renumerar una carpeta si eliminaste imagenes manualmente
+Ejemplo:
+py -3.13 python\renumerar.py --persona "P Diddy"
+
+Vista previa sin cambiar nada:
+py -3.13 python\renumerar.py --persona "P Diddy" --dry-run
+
+Para renumerar desde 0:
+py -3.13 python\renumerar.py --persona "P Diddy" --inicio 0
+
+Este script:
+- detecta archivos con el patron rostro_<numero>.jpg
+- elimina huecos de numeracion
+- renombra los archivos en orden
+
+10. Carpetas generadas
+Dataset = imagenes originales y procesadas
+Dataset_aumentado = imagenes finales con aumentacion
+
+11. Recomendaciones
+- usa siempre py -3.13 para ejecutar los scripts
+- si interrumpes internet.py con Ctrl+C, las imagenes ya guardadas no se pierden
+- si una carpeta tiene huecos en los nombres, usa renumerar.py antes de seguir trabajando
+
+12. Entrenar una CNN de reconocimiento
+Primero instala dependencias:
+py -3.13 -m pip install -r requirements.txt
+
+Si el objetivo es reconocer solo al equipo:
+py -3.13 python\preparar_dataset_equipo.py
+py -3.13 python\entrenar_cnn.py --dataset Dataset_equipo --salida modelo_equipo --epochs 20 --fine-tune-epochs 10
+py -3.13 python\evaluar_cnn.py --dataset Dataset_equipo --modelo modelo_equipo\mejor_modelo.keras --labels modelo_equipo\labels.json
+py -3.13 python\reconocer_cnn.py --modelo modelo_equipo\mejor_modelo.keras --labels modelo_equipo\labels.json
+
+Si quieres que personas fuera del equipo salgan como Desconocido:
+py -3.13 python\preparar_dataset_equipo.py --salida Dataset_equipo_desconocido --con-desconocido --max-desconocidos 300
+py -3.13 python\entrenar_cnn.py --dataset Dataset_equipo_desconocido --salida modelo_equipo_desconocido --epochs 20 --fine-tune-epochs 10
+py -3.13 python\evaluar_cnn.py --dataset Dataset_equipo_desconocido --modelo modelo_equipo_desconocido\mejor_modelo.keras --labels modelo_equipo_desconocido\labels.json
+py -3.13 python\reconocer_cnn.py --modelo modelo_equipo_desconocido\mejor_modelo.keras --labels modelo_equipo_desconocido\labels.json --detector auto --suavizado 5 --mostrar-top --umbral 0.45 --margen 0.20
+
+Si no hay internet para descargar pesos ImageNet:
+py -3.13 python\entrenar_cnn.py --dataset Dataset_equipo --salida modelo_equipo --arquitectura simple --epochs 80 --learning-rate 0.0003
+
+Entrenamiento recomendado con transferencia de aprendizaje:
+py -3.13 python\entrenar_cnn.py --epochs 20 --fine-tune-epochs 10
+
+Este comando usa Dataset, MobileNetV2 como CNN base y aplica aumentacion durante el entrenamiento.
+Es preferible para que la validacion no vea copias aumentadas de la misma foto.
+La primera ejecucion puede descargar pesos de ImageNet.
+
+Si el profesor pide usar exactamente Dataset_aumentado:
+py -3.13 python\entrenar_cnn.py --dataset Dataset_aumentado --epochs 20 --fine-tune-epochs 10 --sin-aumentacion
+
+El entrenamiento crea la carpeta modelo_cnn con:
+- modelo.keras = modelo final
+- mejor_modelo.keras = mejor checkpoint por accuracy de validacion
+- labels.json = nombres de las clases
+- metadata.json = configuracion y metrica final
+- training_history.json = historial de entrenamiento
+
+13. Probar reconocimiento con webcam
+py -3.13 python\reconocer_cnn.py
+
+Presiona q para cerrar la ventana.
+
+14. Probar reconocimiento con una imagen
+py -3.13 python\reconocer_cnn.py --imagen "ruta\a\imagen.jpg"
